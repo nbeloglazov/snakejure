@@ -4,11 +4,12 @@ Game snake, created for learning clojure.
 
 ## Usage
 
-Nothing yet...
+Right now you can start game by invoking function "game" from core.clj file (this function in snakejure.core namespace).
+To win game you must "lay" on every "noiser" (magenta rectangles) simultaneously. When you win game resets.
 
 ## Installation
 
-Nothing yet...
+You can see, that it's leiningen project, but I don't use it right know. I hope I'll start use it in future.
 
 ## License
 
