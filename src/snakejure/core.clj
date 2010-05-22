@@ -11,7 +11,7 @@
 (def height 30)
 (def size 20)
 (def speed 100)
-(def noisers-num 1)
+(def noisers-num 2)
 (def dirs { VK_LEFT [0 -1]
 	    VK_RIGHT [0 1]
 	    VK_UP [-1 0]
@@ -154,7 +154,7 @@
       (.addKeyListener key-listener))
     (doto frame
       (.add panel)
-      (.setVisible true)
-      (.pack))
+      (.pack)
+      (.setVisible true))
     (.start timer)
     [snake apple noisers timer]))
