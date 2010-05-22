@@ -4,14 +4,27 @@ Game snake, created for learning clojure.
 
 ## Usage
 
-Right now you can start game by invoking function "game" from core.clj file, 
-this function in snakejure.core namespace.
+You can start game by executing game.sh (linux) or game.bat (windows).
+I didn't test game.bat on windows, so I'm not sure it work properly. 
+Or you can start game by invoking function "game" from ui.clj file, 
+this function in snakejure.uo namespace.
 To win game you must "lay" on every "noiser" (magenta rectangles) simultaneously. When you win game resets.
 
 ## Installation
 
 You can see, that it's leiningen project, but I don't use leiningen it right know. 
 I hope I'll start use it in future.
+
+## Structure
+
+There are 2 clojure files now. 
+core.clj - contains basic functions, "business" functions :). 
+	   They are responsible for changing state of the game.
+ui.clj   - contains user interface functions. 
+  	   They interact with user, create frame, timer, action listeners.
+
+I'm planning to extract from core.clj all functions, which are responsible for modifying
+mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
 
 ## License
 

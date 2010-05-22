@@ -1,11 +1,9 @@
 (ns snakejure.core
     (:use (clojure.contrib seq-utils
 			   import-static))
-    (:import (java.awt Color Dimension)
-	     (java.awt.event ActionListener KeyListener)
-	     (javax.swing JPanel Timer JFrame JOptionPane)))
+    (:import (java.awt Color)))
 
-(import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_DOWN VK_UP VK_SPACE)
+(import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_DOWN VK_UP)
 
 (def width 30)
 (def height 30)
@@ -18,143 +16,98 @@
 	    VK_DOWN [1 0]} )
 
 
-(defn overlaps-body? [{body :body} point]
+(defn overlaps-body? 
+  "Check, if snake's body overlaps some given point."
+  [{body :body} point]
   (includes? body point))
 
-(defn add-points [& args]
+(defn add-points
+  "Add two or more points by coordinates."
+  [& args]
   (vec (apply map + args)))
 
-(defn random-point []
+(defn random-point
+  "Creates random point with x in [0,width), y in [0, height)."
+  []
   [(rand-int height) (rand-int width)])
 
 (defn create-apple 
+  "Creates new apple in random location. 
+  If snake is given, created apple will not overlap snake's body."
   ([] 
    {:location (random-point)
-   :type :apple
-   :color (Color/RED)})
+    :type :apple
+    :color (Color/RED)})
   ([snake]
    (find-first #(not (overlaps-body? snake (:location %))) (repeatedly create-apple))))
 
 (defn create-noiser []
+  "Creates new noiser in random location."
   {:location (random-point)
    :type :noiser
    :color-noise (Color/BLUE)
    :color-silence (Color/MAGENTA)})
 
 (defn create-noisers [n]
+  "Creates sequence with n noisers in random locations. 
+  Noisers may overlap each other."
   (take n (repeatedly create-noiser)))
 
 (defn create-snake [] 
+  "Creates new snake of length 1 in random location. And direction to right."
   {:body (list (random-point))
    :type :snake
    :dir VK_RIGHT
    :color (Color/CYAN)})
 
 (defn normalize-point [[y x]]
+  "Normalize points, so it'll lay inside field."
   [(rem (+ y height) height)
    (rem (+ x width) width)])
 
 (defn move-snake [{:keys [body dir] :as snake} & grow]
+  "Moves snake in current direction. If grow is given, 
+  snake will grow, length will increase by 1 unit."
   (assoc snake :body  (cons (normalize-point (add-points (first body) (dirs dir)))
 			    (if grow body (butlast body)))))
 
 (defn eats? [{[head] :body} {apple :location}]
+  "Checks if snake can ear appple."
   (= head apple))
 
 (defn turn-snake [{:keys [dir] :as snake} new-dir]
+  "Turns snake in given direction."
   (if (= [0 0] (add-points (dirs dir) (dirs new-dir)))
     snake
     (assoc snake :dir new-dir)))
 
 (defn lose? [{[head & body] :body}]
+  "Checks if user lose. Now it's only possible if snake bite itself."
   (includes? body head))
 
 (defn win? [{body :body} noisers]
+  "Check if use win. User wins, when snake lay on every noser simultaneously."
   (every? true? (map #(includes? body (:location %)) noisers)))
 
 (defn reset [snake apple noisers]
+  "Takes refs of snake, apple, noisers and resets game. 
+  It will set to refs new generated snake, apple and ref. 
+  Snake will be 1 unit length."
   (dosync 
    (ref-set snake (create-snake))
    (ref-set apple (create-apple @snake))
    (ref-set noisers (create-noisers noisers-num))))
 
 (defn update-direction [snake dir]
+  "Takes refs of snake, and set new snake with updated direction to it."
   (dosync (alter snake turn-snake dir)))
 
 (defn update-position [snake apple]
+  "Takes refs of snake and apple, and moves snakes.
+  If snake eats apple, length increases."
   (dosync 
    (if (eats? @snake @apple)
      (do (alter snake move-snake :grow)
 	 (ref-set apple (create-apple snake))))
      (alter snake move-snake)))
 
-(defn draw-point [g [y x]]
-  (.fillRect g (* size x) (* size y) size size))
-
-(defmulti paint (fn [g object & _] (:type object)))
-
-(defmethod paint :snake [g {:keys [body color]}]
-  (.setColor g color)
-  (doseq [part body] (draw-point g part)))
-
-(defmethod paint :apple [g {:keys [location color]}]
-  (.setColor g color)
-  (draw-point g location))
-
-(defmethod paint :noiser [g {:keys [location color-noise color-silence]} snake]
-  (if (overlaps-body? snake location)
-    (.setColor g color-noise)
-    (.setColor g color-silence))
-  (draw-point g location))
-
-(defn switch-timer [timer]
-  (if (.isRunning timer) 
-    (.stop timer)
-    (.restart timer)))
-
-      
-(defn game-panel [frame snake apple noisers]
-  (proxy [JPanel KeyListener ActionListener] []
-     (paintComponent [g]
-       (proxy-super paintComponent g)
-       (paint g @apple)
-       (paint g @snake)
-       (doseq [noiser @noisers] (paint g noiser @snake)))
-     (actionPerformed [e]
-       (update-position snake apple)
-       (when (lose? @snake) 
-	 (JOptionPane/showMessageDialog frame "You lose...")
-	 (reset snake apple noisers))
-       (when (win? @snake @noisers)
-	 (reset snake apple noisers))
-       (.repaint this))
-     (getPreferredSize []
-       (Dimension. (* (inc (dec width)) size) 
-		   (* (inc (dec height)) size)))))
-
-(defn create-key-listener [snake timer]
-  (proxy [KeyListener] []
-    (keyPressed [e]
-       (if (= (.getKeyCode e) VK_SPACE)
-	  (switch-timer timer)
-	  (update-direction snake (.getKeyCode e))))
-     (keyReleased [e])
-     (keyTyped [e])))
-
-(defn game []
-  (let [snake (ref (create-snake))
-	apple (ref (create-apple snake))
-	noisers (ref (create-noisers noisers-num))
-	frame (JFrame. "Snake")
-	panel (game-panel frame snake apple noisers)
-	timer (Timer. speed panel)
-	key-listener (create-key-listener snake timer)]
-    (doto panel
-      (.setFocusable true)
-      (.addKeyListener key-listener))
-    (doto frame
-      (.add panel)
-      (.pack)
-      (.setVisible true))
-    (.start timer)
-    [snake apple noisers timer]))
