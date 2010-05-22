@@ -11,7 +11,7 @@
 (def height 30)
 (def size 20)
 (def speed 100)
-(def noisers-num 3)
+(def noisers-num 1)
 (def dirs { VK_LEFT [0 -1]
 	    VK_RIGHT [0 1]
 	    VK_UP [-1 0]
@@ -128,9 +128,9 @@
        (when (win? @snake @noisers)
 	 (reset snake apple noisers))
        (.repaint this))
-     (.getPreferredSize[]
-       (Dimension. (* (inc width) size) 
-		   (* (inc height) size)))))
+     (getPreferredSize []
+       (Dimension. (* (inc (dec width)) size) 
+		   (* (inc (dec height)) size)))))
 
 (defn create-key-listener [snake timer]
   (proxy [KeyListener] []
@@ -154,7 +154,7 @@
       (.addKeyListener key-listener))
     (doto frame
       (.add panel)
-      (.pack)
-      (.setVisible true))
+      (.setVisible true)
+      (.pack))
     (.start timer)
     [snake apple noisers timer]))
