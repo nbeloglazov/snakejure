@@ -23,9 +23,13 @@ core.clj - contains basic functions, "business" functions :).
 ui.clj   - contains user interface functions. 
   	   They interact with user, create frame, timer, action listeners.
 
-I'm planning to extract from core.clj all functions, which are responsible for modifying
+## TODO
+1. Write tests for core.clj
+2. Add levels: every level is map with :snake :apple-generator :noisers keys. Apple generator is a function
+for generating apples. I want every level to be in it's own clj file, and application will dynamically load them.
+3. Add walls to make game more interesting.
+4. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
+5. Check game.bat on windows :)
 
-## License
-
-I don't know. It seems to me, it's not very important now :)
+  
