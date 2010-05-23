@@ -1,14 +1,13 @@
 (ns snakejure.ui
-    (:use (clojure.contrib import-static))
+    (:use (clojure.contrib import-static)
+	  (snakejure core))
     (:import (java.awt Dimension)
 	     (java.awt.event ActionListener KeyListener)
 	     (javax.swing JPanel Timer JFrame JOptionPane)))
 
-(import-static java.awt.event.KeyEvent VK_SPACE)
+(import-static java.awt.event.KeyEvent VK_SPACE VK_UP VK_DOWN VK_RIGHT VK_LEFT)
 
-
-(load "/core")
-(refer 'snakejure.core)
+(def dir-keys #{VK_DOWN VK_RIGHT VK_LEFT VK_UP})
 
 (defn draw-point 
   "Draws point on given graphics g."
@@ -32,6 +31,8 @@
   (draw-point g location))
 
 (defn switch-timer [timer]
+  "Stop timer, if it's running.
+  Start otherwise."
   (if (.isRunning timer) 
     (.stop timer)
     (.restart timer)))
@@ -42,31 +43,33 @@
   See source :)"
   [frame snake apple noisers]
   (proxy [JPanel ActionListener] []
-     (paintComponent [g]
-       (proxy-super paintComponent g)
-       (paint g @apple)
-       (paint g @snake)
-       (doseq [noiser @noisers] (paint g noiser @snake)))
-     (actionPerformed [e]
-       (update-position snake apple)
-       (when (lose? @snake) 
-	  (JOptionPane/showMessageDialog frame "You lose...")
-	   (reset snake apple noisers))
-       (when (win? @snake @noisers)
-	  (reset snake apple noisers))
-       (.repaint this))
-     (getPreferredSize []
-       (Dimension. (* (inc (dec width)) size) 
-		      (* (inc (dec height)) size)))))
+	 (paintComponent [g]
+			 (proxy-super paintComponent g)
+			 (paint g @apple)
+			 (paint g @snake)
+			 (doseq [noiser @noisers] (paint g noiser @snake)))
+	 (actionPerformed [e]
+			  (update-position snake apple)
+			  (when (lose? @snake) 
+			    (JOptionPane/showMessageDialog frame "You lose...")
+			    (reset snake apple noisers))
+			  (when (win? @snake @noisers)
+			    (JOptionPane/showMessageDialog frame "You win!")
+			    (reset snake apple noisers))
+			  (.repaint this))
+	 (getPreferredSize []
+			   (Dimension. (* (inc (dec width)) size) 
+				       (* (inc (dec height)) size)))))
 
 (defn create-key-listener [snake timer]
   (proxy [KeyListener] []
-    (keyPressed [e]
-       (if (= (.getKeyCode e) VK_SPACE)
-	   (switch-timer timer)
-	     (update-direction snake (.getKeyCode e))))
-     (keyReleased [e])
-     (keyTyped [e])))
+	 (keyPressed [e]
+		     (if (= (.getKeyCode e) VK_SPACE)
+		       (switch-timer timer))
+		     (if (dir-keys (.getKeyCode e))
+		       (update-direction snake (.getKeyCode e))))
+	 (keyReleased [e])
+	 (keyTyped [e])))
 
 (defn game []
   "Starts game. It will create frame with snake, apple and noisers in it."
