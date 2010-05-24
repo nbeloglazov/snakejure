@@ -85,6 +85,7 @@
       (.addKeyListener key-listener))
     (doto frame
       (.add panel)
+      (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
       (.pack)
       (.setVisible true))
     (.start timer)
