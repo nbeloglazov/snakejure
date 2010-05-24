@@ -5,7 +5,6 @@ Game snake, created for learning clojure.
 ## Usage
 
 You can start game by executing game.sh (linux) or game.bat (windows).
-I didn't test game.bat on windows, so I'm not sure it work properly. 
 Or you can start game by invoking function "game" from ui.clj file, 
 this function in snakejure.uo namespace.
 To win game you must "lay" on every "noiser" (magenta rectangles) simultaneously. When you win game resets.
@@ -30,6 +29,5 @@ for generating apples. I want every level to be in it's own clj file, and applic
 3. Add walls to make game more interesting.
 4. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
-5. Check game.bat on windows :)
 
   
