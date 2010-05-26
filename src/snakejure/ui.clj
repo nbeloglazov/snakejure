@@ -5,9 +5,9 @@
 	     (java.awt.event ActionListener KeyListener)
 	     (javax.swing JPanel Timer JFrame JOptionPane)))
 
-(import-static java.awt.event.KeyEvent VK_SPACE VK_UP VK_DOWN VK_RIGHT VK_LEFT)
+(import-static java.awt.event.KeyEvent VK_SPACE)
 
-(def dir-keys #{VK_DOWN VK_RIGHT VK_LEFT VK_UP})
+(def dir-keys (set (keys dirs)))
 
 (defn draw-point 
   "Draws point on given graphics g."
