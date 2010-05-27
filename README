@@ -23,11 +23,15 @@ ui.clj   - contains user interface functions.
   	   They interact with user, create frame, timer, action listeners.
 
 ## TODO
-1. Write tests for core.clj
-2. Add levels: every level is map with :snake :apple-generator :noisers keys. Apple generator is a function
+1. Add levels: every level is map with :snake :apple-generator :noisers keys. Apple generator is a function
 for generating apples. I want every level to be in it's own clj file, and application will dynamically load them.
-3. Add walls to make game more interesting.
-4. Extract from core.clj all functions, which are responsible for modifying
+2. Add walls to make game more interesting.
+3. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
+4. Remove boundaries and make field infinite. 
+
+I want to create ability to run levels, written in clojure. They will be placed in clj files in /src/snakejure/levels directory. 
+I don't know exactly how do load them when application starts... Some kind of reflection, but it must be ease in clojure.
+I suppose there are some functions for it.
 
   
