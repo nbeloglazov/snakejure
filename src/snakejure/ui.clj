@@ -24,6 +24,10 @@
   (.setColor g color)
   (draw-point g location))
 
+(defmethod paint :wall [g {:keys [location color]}]
+  (.setColor g color)
+  (draw-point g location))
+
 (defmethod paint :noiser [g {:keys [location color-noise color-silence]} snake]
   (if (overlaps-body? snake location)
     (.setColor g color-noise)
@@ -41,21 +45,22 @@
 (defn game-panel 
   "Creates proxy...
   See source :)"
-  [frame snake apple noisers]
+  [frame snake apple noisers walls]
   (proxy [JPanel ActionListener] []
 	 (paintComponent [g]
 			 (proxy-super paintComponent g)
 			 (paint g @apple)
 			 (paint g @snake)
-			 (doseq [noiser @noisers] (paint g noiser @snake)))
+			 (doseq [noiser @noisers] (paint g noiser @snake))
+			 (doseq [wall @walls] (paint g wall)))
 	 (actionPerformed [e]
-			  (update-position snake apple)
-			  (when (lose? @snake) 
+			  (update-position snake apple walls)
+			  (when (lose? @snake @walls) 
 			    (JOptionPane/showMessageDialog frame "You lose...")
-			    (reset snake apple noisers))
+			    (reset snake apple noisers walls))
 			  (when (win? @snake @noisers)
 			    (JOptionPane/showMessageDialog frame "You win!")
-			    (reset snake apple noisers))
+			    (reset snake apple noisers walls))
 			  (.repaint this))
 	 (getPreferredSize []
 			   (Dimension. (* (inc (dec width)) size) 
@@ -72,14 +77,15 @@
 	 (keyTyped [e])))
 
 (defn game []
-  "Starts game. It will create frame with snake, apple and noisers in it."
-  (let [snake (ref (create-snake))
-	apple (ref (create-apple snake))
-	noisers (ref (create-noisers noisers-num))
+  "Starts game. It will create frame with walls, snake, apple and noisers in it."
+  (let [walls (ref (create-walls walls-num))
+	snake (ref (create-snake @walls))
+	apple (ref (create-apple @snake @walls))
+	noisers (ref (create-noisers noisers-num @walls))
 	frame (JFrame. "Snake")
-	panel (game-panel frame snake apple noisers)
+	panel (game-panel frame snake apple noisers walls)
 	timer (Timer. speed panel)
-	key-listener (create-key-listener snake timer)]
+ 	key-listener (create-key-listener snake timer)]
     (doto panel
       (.setFocusable true)
       (.addKeyListener key-listener))
@@ -88,5 +94,4 @@
       (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
       (.pack)
       (.setVisible true))
-    (.start timer)
-    [snake apple noisers timer]))
+    (.start timer)))

@@ -5,6 +5,12 @@
 (deftest add-points-t
     (is (= [1 1] (add-points [0 25] [1 -3] [0 -21]))))
 
+(deftest overlaps-walls?-t 
+  (let [walls (list {:location [0 0]})]
+    (are [pred point] (pred (overlaps-walls? walls point))
+	 true? [0 0]
+	 false? [1 1])))
+
 (deftest overlaps-body?-t
   (let [snake {:body [ [0 0] [0 1] [1 1] [2 1] [3 1] [3 2] ]}] 
     (is (true? (overlaps-body? snake [1 1])))
@@ -25,9 +31,8 @@
   (for [y (range height) x (range width)] [y x]))
 
 (deftest create-apple-t 
-  (is (every? apple?  (take 20 (repeatedly create-apple))))
   (is (let [snake {:body (rest (create-full-table-snake))}
-	    apple (create-apple snake)]
+	    apple (create-apple snake '())]
 	(and (apple? apple)
 	     (= (:location apple) [0 0])))))
 
@@ -38,7 +43,8 @@
        (= :noiser type)))
 
 (deftest create-noiser-t
-  (is (every? noiser? (take 20 (repeatedly create-noiser)))))
+  (is (every? noiser? 
+	      (take 20 (repeatedly #(create-noiser '()))))))
 
 (defn snake? [{:keys [body type dir color]}]
   (and (point? (first body))
@@ -46,7 +52,7 @@
        (instance? java.awt.Color color)))
 
 (deftest create-snake-t
-  (is (snake? (create-snake))))
+  (is (snake? (create-snake '()))))
 
 (deftest normalize-point-t
   (let [w (dec width)
@@ -56,21 +62,25 @@
 	 [h w] [-1 -1])))
 
 (deftest move-snake-t
-  (let [snake (create-snake)]
+  (let [snake (create-snake '())]
     (is (= 2 (count (:body (move-snake snake :grow)))))))
 
 (deftest eats?-t
-  (let [snake (create-snake)
+  (let [snake (create-snake '())
 	location (first (:body snake))]
     (are [pred apple] (pred (eats? snake {:location apple}))
 	 true? location
 	 false? (add-points location [1 0]))))
 
 (deftest lose?-t 
-  (let [snake {:body (list [0 0] [1 0] [0 0])}]
-    (are [pred sn] (pred (lose? sn))
-	 true? snake
-	 false? (create-snake))))
+  (let [snake {:body (list [0 0] [1 0] [0 0])}
+	walls-in (list {:location [0 0]})
+	walls-out (list {:location [1 1]})
+	snake-lit {:body (list [0 0])}]
+    (are [pred sn walls] (pred (lose? sn walls))
+	 true? snake walls-in
+	 false? snake-lit walls-out
+	 true? snake-lit walls-in)))
 
 (deftest win?-t
   (let [snake {:body (for [a (range 10)] [a 0])}
