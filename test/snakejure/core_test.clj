@@ -40,3 +40,43 @@
 (deftest create-noiser-t
   (is (every? noiser? (take 20 (repeatedly create-noiser)))))
 
+(defn snake? [{:keys [body type dir color]}]
+  (and (point? (first body))
+       (= type :snake)
+       (instance? java.awt.Color color)))
+
+(deftest create-snake-t
+  (is (snake? (create-snake))))
+
+(deftest normalize-point-t
+  (let [w (dec width)
+	h (dec height)]
+    (are [p1 p2] (= p1 (normalize-point p2))
+	 [0 0] [height width]
+	 [h w] [-1 -1])))
+
+(deftest move-snake-t
+  (let [snake (create-snake)]
+    (is (= 2 (count (:body (move-snake snake :grow)))))))
+
+(deftest eats?-t
+  (let [snake (create-snake)
+	location (first (:body snake))]
+    (are [pred apple] (pred (eats? snake {:location apple}))
+	 true? location
+	 false? (add-points location [1 0]))))
+
+(deftest lose?-t 
+  (let [snake {:body (list [0 0] [1 0] [0 0])}]
+    (are [pred sn] (pred (lose? sn))
+	 true? snake
+	 false? (create-snake))))
+
+(deftest win?-t
+  (let [snake {:body (for [a (range 10)] [a 0])}
+	noisers (for [a (range 1 12 2)] {:location [a 0]})]
+    (are [pred nsz] (pred (win? snake nsz))
+	 true? (butlast noisers)
+	 false? noisers)))
+
+	  
