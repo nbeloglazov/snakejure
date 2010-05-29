@@ -143,6 +143,6 @@
   (dosync 
    (if (eats? @snake @apple)
      (do (alter snake move-snake :grow)
-	 (ref-set apple (create-apple @snake @walls))))
-     (alter snake move-snake)))
+	 (ref-set apple (create-apple @snake @walls)))
+     (alter snake move-snake))))
 
