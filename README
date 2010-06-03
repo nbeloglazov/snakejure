@@ -30,7 +30,7 @@ mutable data (like update-smth). But I don't know now what name new clj file and
 3. Remove boundaries and make field infinite. 
 
 I want to create ability to run levels, written in clojure. They will be placed in clj files in /src/snakejure/levels directory. 
-I don't know exactly how do load them when application starts... Some kind of reflection, but it must be ease in clojure.
+I don't know exactly how do load them when application starts... Some kind of reflection, but it should be easy in clojure.
 I suppose there are some functions for it.
 
   
