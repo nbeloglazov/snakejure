@@ -16,11 +16,16 @@ I hope I'll start use it in future.
 
 ## Structure
 
-There are 2 clojure files now. 
 core.clj - contains basic functions, "business" functions :). 
 	   They are responsible for changing state of the game.
 ui.clj   - contains user interface functions. 
   	   They interact with user, create frame, timer, action listeners.
+levels directory - directory with clj files, which represents levels.
+
+Each level is a separate clj file with at least 1 public function - "create-level" with no arguments:
+(defn create-level [] ...)
+It must return map like with following keys: :name :snake :apple :noisers :walls.
+For example see basic.clj level.
 
 ## TODO
 1. Add levels: every level is map with :snake :apple-generator :noisers keys. Apple generator is a function
