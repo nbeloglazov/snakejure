@@ -5,14 +5,17 @@
 
 (def width 30)
 (def height 30)
-(def size 20)
-(def speed 100)
-(def noisers-num 4)
-(def walls-num 20)
+
 (def dirs {:left  [0 -1]
 	   :right [0 1]
 	   :up [-1 0]
 	   :down [1 0]} )
+
+(defmacro let-map [[mp & ks] & body]
+  `(let ~(vec (apply concat
+		     (for [key ks] 
+		          [key `(~(keyword key) ~mp)])))
+     ~@body))
 
 (defn overlaps-body? 
   "Check, if snake's body overlaps some given point."
@@ -28,60 +31,6 @@
   "Check, if some given point overlaps walls."
   [walls point]
   (not (every? false? (map #(= point (:location %)) walls))))
-
-(defn random-point
-  "Creates random point with x in [0,width), y in [0, height).
-  If walls is given, then created point won't overlap them."
-  ([]
-     [(rand-int height) (rand-int width)])
-  ([walls]
-     (find-first #(not (overlaps-walls? walls %)) (repeatedly random-point))))
-
-(defn create-apple 
-  "Creates new apple in random point. 
-  Created apple won't overlap snake's body and walls."
-  [snake walls] 
-  {:location (find-first #(not (overlaps-body? snake %)) (repeatedly #(random-point walls)))
-   :type :apple
-   :color (Color/RED)})
-
-#_(defn create-wall
-  "Creates new wall in random point."
-  []
-  {:location (random-point)
-   :type :wall
-   :color (Color/BLACK)})
-
-#_(defn create-walls
-  "Creates sequence of n walls in random points.
-  Walls may overlap each other"
-  [n]
-  (take n (repeatedly create-wall)))
-
-
-#_(defn create-noiser
-  "Creates new noiser in random location.
-  It won't overlap walls."
-  [walls]
-  {:location (random-point walls)
-   :type :noiser
-   :color-noise (Color/BLUE)
-   :color-silence (Color/MAGENTA)})
-
-#_(defn create-noisers
-  "Creates sequence with n noisers in random locations. 
-  Noisers may overlap each other."
-  [n walls]
-  (take n (repeatedly #(create-noiser walls))))
-
-#_(defn create-snake
-  "Creates new snake of length 1 in random location. And direction to right.
-  Snake's head won't overlap walls."
-  [walls] 
-  {:body (list (random-point walls))
-   :type :snake
-   :dir :right
-   :color (Color/CYAN)})
 
 (defn normalize-point
   "Normalize points, so it'll lay inside field."
@@ -121,18 +70,22 @@
   [{body :body} noisers]
   (every? true? (map #(includes? body (:location %)) noisers)))
 
-(defn update-direction 
-  "Takes refs of snake, and set new snake with updated direction to it."
-  [snake dir]
-  (dosync (alter snake turn-snake dir)))
+(defn update-snake-direction 
+  "Takes level ref, and set new snake with updated direction in it."
+  [level dir]
+  (dosync (alter level 
+		 assoc :snake (turn-snake (:snake @level) dir))))
 
-(defn update-position
-  "Takes refs of snake and apple, and moves snakes.
-  If snake eats apple, length increases."
-  [snake apple walls]
-  (dosync 
-   (if (eats? @snake @apple)
-     (do (alter snake move-snake :grow)
-	 (ref-set apple (create-apple @snake @walls)))
-     (alter snake move-snake))))
+(defn update-snake-position
+  "Takes level ref and moves snake in it,
+  altering ref."
+  [level]
+  (let-map [@level snake apple walls generator]
+	   (dosync 
+	    (if (eats? snake apple)
+	      (let [new-snake (move-snake snake :grow)]
+		(alter level assoc :snake new-snake 
+                                   :apple (generator new-snake walls)))
+	      (alter level assoc :snake (move-snake snake))))))
+
 

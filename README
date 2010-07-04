@@ -1,6 +1,6 @@
 # snakejure
 
-Game snake, created for learning clojure.
+Game snake, created for learning clojure purpose.
 
 ## Usage
 
@@ -28,7 +28,7 @@ It must return map with following keys: :name :snake :apple :noisers :walls.
 For example see basic.clj level.
 
 ## TODO
-1. Add levels: every level is map with :snake :apple-generator :noisers keys. Apple generator is a function
+1. Add levels: every level is map with :snake :generator :noisers keys. Apple generator is a function
 for generating apples. I want every level to be in it's own clj file, and application will dynamically load them.
 2. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.

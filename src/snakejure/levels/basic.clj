@@ -5,9 +5,8 @@
 
 (def width 30)
 (def height 30)
-(def size 20)
-(def noisers-num 4)
-(def walls-num 20)
+(def noisers-num 2)
+(def walls-num 10)
 
 (defn- overlaps-body?
   "Check, if snake's body overlaps some given point."
@@ -81,4 +80,9 @@
 	snake (create-snake walls)
 	noisers (create-noisers noisers-num  walls)
 	apple (create-apple snake walls)]
-    { :name "Basic" :walls walls :noisers noisers :snake snake :apple apple }))
+    {:name "Basic"
+     :walls walls
+     :noisers noisers
+     :snake snake
+     :apple apple
+     :generator create-apple}))
