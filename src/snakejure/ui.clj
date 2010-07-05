@@ -19,32 +19,35 @@
 (defn reset
   "Take level ref and set new level to it."
   [level]
-  (dosync (ref-set level (snakejure.levels.basic/create-level))))
+  (dosync (ref-set level (add-d (snakejure.levels.basic/create-level)))))
 
 (defn draw-point 
   "Draws point on given graphics g."
-  [g [y x]]
-  (.fillRect g (* size x) (* size y) size size))
+  [g [y x] [dy dx]]
+  (.fillRect g (* size (+ x dx)) 
+	       (* size (+ y dy)) 
+	       size 
+	       size))
 
 (defmulti paint (fn [g object & _] (:type object)))
 
-(defmethod paint :snake [g {:keys [body color]}]
+(defmethod paint :snake [g {:keys [body color]} d]
   (.setColor g color)
-  (doseq [part body] (draw-point g part)))
+  (doseq [part body] (draw-point g part d)))
 
-(defmethod paint :apple [g {:keys [location color]}]
+(defmethod paint :apple [g {:keys [location color]} d]
   (.setColor g color)
-  (draw-point g location))
+  (draw-point g location d))
 
-(defmethod paint :wall [g {:keys [location color]}]
+(defmethod paint :wall [g {:keys [location color]} d]
   (.setColor g color)
-  (draw-point g location))
+  (draw-point g location d))
 
-(defmethod paint :noiser [g {:keys [location color-noise color-silence]} snake]
+(defmethod paint :noiser [g {:keys [location color-noise color-silence]} snake d]
   (if (overlaps-body? snake location)
     (.setColor g color-noise)
     (.setColor g color-silence))
-  (draw-point g location))
+  (draw-point g location d))
 
 (defn switch-timer [timer]
   "Stop timer, if it's running.
@@ -59,12 +62,12 @@
   [frame level]
   (proxy [JPanel ActionListener] []
 	 (paintComponent [g]
-			 (let-map [@level snake noisers walls apple]
+			 (let-map [@level snake noisers walls apple d]
 				  (proxy-super paintComponent g)
-				  (paint g apple)
-				  (paint g snake)
-				  (doseq [noiser noisers] (paint g noiser snake))
-				  (doseq [wall walls] (paint g wall))))
+				  (paint g apple d)
+				  (paint g snake d)
+				  (doseq [noiser noisers] (paint g noiser snake d))
+				  (doseq [wall walls] (paint g wall d))))
 	 (actionPerformed [e]
 			  (let-map [@level snake noisers walls] 
 				   (update-snake-position level)
