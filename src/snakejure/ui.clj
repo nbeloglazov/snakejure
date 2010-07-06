@@ -16,12 +16,12 @@
 (def speed 100)
 (def dir-keys (set (keys key-to-dir)))
 
-(defn reset
+(defn- reset
   "Take level ref and set new level to it."
   [level]
   (dosync (ref-set level (add-d (snakejure.levels.basic/create-level)))))
 
-(defn draw-point 
+(defn- draw-point 
   "Draws point on given graphics g."
   [g [y x] [dy dx]]
   (.fillRect g (* size (+ x dx)) 
@@ -49,17 +49,17 @@
     (.setColor g color-silence))
   (draw-point g location d))
 
-(defn switch-timer [timer]
+(defn- switch-timer [timer]
   "Stop timer, if it's running.
   Start otherwise."
   (if (.isRunning timer) 
     (.stop timer)
     (.restart timer)))
 
-(defn game-panel 
+(defn- poor-game-panel 
   "Creates proxy...
   See source :)"
-  [frame level]
+  [level]
   (proxy [JPanel ActionListener] []
 	 (paintComponent [g]
 			 (let-map [@level snake noisers walls apple d]
@@ -72,17 +72,17 @@
 			  (let-map [@level snake noisers walls] 
 				   (update-snake-position level)
 				   (when (lose? snake walls) 
-				     (JOptionPane/showMessageDialog frame "You lose...")
+				     (JOptionPane/showMessageDialog nil "You lose...")
 				     (reset level))
 				   (when (win? snake noisers)
-				     (JOptionPane/showMessageDialog frame "You win!")
+				     (JOptionPane/showMessageDialog nil "You win!")
 				     (reset level))
 				   (.repaint this)))
 	 (getPreferredSize []
 			   (Dimension. (* (inc (dec width)) size) 
 				       (* (inc (dec height)) size)))))
 
-(defn create-key-listener [level timer]
+(defn- create-key-listener [level timer]
   (proxy [KeyListener] []
 	 (keyPressed [e]
 		     (if (= (.getKeyCode e) VK_SPACE)
@@ -92,20 +92,22 @@
 	 (keyReleased [e])
 	 (keyTyped [e])))
 
+(defn- game-panel [level]
+  (let [panel (poor-game-panel level)
+	timer (Timer. speed panel)
+	key-listener (create-key-listener level timer)]
+    (doto panel
+      (.setFocusable true)
+      (.addKeyListener key-listener))))
+
 (defn game []
   "Starts game. It will create frame with walls, snake, apple and noisers in it."
   (let [level (ref nil)
 	frame (JFrame. "Snake")
-	panel (game-panel frame level)
-	timer (Timer. speed panel)
-	key-listener (create-key-listener level timer)]
+	panel (game-panel level)]
     (reset level)
-    (doto panel
-      (.setFocusable true)
-      (.addKeyListener key-listener))
     (doto frame
       (.add panel)
       (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
       (.pack)
-      (.setVisible true))
-    (.start timer)))
+      (.setVisible true))))
