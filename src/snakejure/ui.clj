@@ -68,19 +68,23 @@
 				  (paint g snake d)
 				  (doseq [noiser noisers] (paint g noiser snake d))
 				  (doseq [wall walls] (paint g wall d))))
-	 (actionPerformed [e]
-			  (let-map [@level snake noisers walls] 
-				   (update-snake-position level)
-				   (when (lose? snake walls) 
-				     (JOptionPane/showMessageDialog nil "You lose...")
-				     (reset level))
-				   (when (win? snake noisers)
-				     (JOptionPane/showMessageDialog nil "You win!")
-				     (reset level))
-				   (.repaint this)))
 	 (getPreferredSize []
 			   (Dimension. (* (inc (dec width)) size) 
 				       (* (inc (dec height)) size)))))
+
+(defn- create-action-listener [level panel]
+  (proxy [ActionListener] []
+	 (actionPerformed [e]
+			  (let-map [@level snake noisers walls] 
+			    (update-snake-position level)
+			    (when (lose? snake walls) 
+			      (JOptionPane/showMessageDialog nil "You lose...")
+			      (reset level))
+			    (when (win? snake noisers)
+			      (JOptionPane/showMessageDialog nil "You win!")
+			      (reset level))
+			    (.repaint panel)))))
+
 
 (defn- create-key-listener [level timer]
   (proxy [KeyListener] []
@@ -94,7 +98,8 @@
 
 (defn- game-panel [level]
   (let [panel (poor-game-panel level)
-	timer (Timer. speed panel)
+	action-listener (create-action-listener level panel)
+	timer (Timer. speed action-listener)
 	key-listener (create-key-listener level timer)]
     (doto panel
       (.setFocusable true)

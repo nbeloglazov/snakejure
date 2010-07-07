@@ -85,4 +85,8 @@
      :noisers noisers
      :snake snake
      :apple apple
-     :generator create-apple}))
+     :apple-generator create-apple}))
+
+(defn level-description []
+  {:name "Basic"
+   :level-creator create-level})

@@ -3,9 +3,9 @@
 			 import-static))
   (:import (java.awt Color)))
 
-(def width 30)
-(def height 30)
-(def indent 5)
+(def width 40)
+(def height 40)
+(def indent 4)
 
 (def dirs {:left  [0 -1]
 	   :right [0 1]
@@ -78,9 +78,9 @@
   it depends on width, height and indent vars."
   [[y x]]
   (and (>= x indent)
-       (<= x (- width indent))
+       (< x (- width indent))
        (>= y indent)
-       (<= y (- height indent))))
+       (< y (- height indent))))
 
 (defn normalize-level 
   "Normalizes :d in level, so snake head will be inside screen."
@@ -105,12 +105,12 @@
   "Takes level ref and moves snake in it,
   altering ref."
   [level]
-  (let-map [@level snake apple walls generator d]
+  (let-map [@level snake apple walls apple-generator d]
 	   (dosync 
 	    (if (eats? snake apple)
 	      (let [new-snake (move-snake snake :grow)]
 		(alter level assoc :snake new-snake 
-                                   :apple (generator new-snake walls)
+                                   :apple (apple-generator new-snake walls)
 				   :d (normalize-level new-snake d)))
 	      (let [new-snake (move-snake snake)]
 		(alter level assoc :snake new-snake
