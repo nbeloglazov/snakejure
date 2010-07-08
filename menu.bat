@@ -1,0 +1,1 @@
+java -cp lib\*;src;. clojure.main -e "(do (use 'snakejure.menu-gui) (show-menu))"

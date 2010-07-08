@@ -1,4 +1,4 @@
-(ns snakejure.levels.basic
+(ns snakejure.levels.copy-basic
   (:use (clojure.contrib seq-utils))
   (:import (java.io File)
 	   (java.awt Color)))
@@ -87,5 +87,5 @@
      :apple-generator create-apple}))
 
 (defn level-description []
-  {:name "Basic"
+  {:name "Copy Basic"
    :level-creator create-level})

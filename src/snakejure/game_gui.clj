@@ -1,4 +1,4 @@
-(ns snakejure.ui
+(ns snakejure.game-gui
       (:use (clojure.contrib import-static)
 	    (snakejure core))
       (:require   (snakejure.levels basic))
@@ -96,8 +96,9 @@
 	 (keyReleased [e])
 	 (keyTyped [e])))
 
-(defn- game-panel [level]
-  (let [panel (poor-game-panel level)
+(defn create-game-panel [lvl]
+  (let [level (ref (add-d lvl))
+	panel (poor-game-panel level)
 	action-listener (create-action-listener level panel)
 	timer (Timer. speed action-listener)
 	key-listener (create-key-listener level timer)]
@@ -107,10 +108,9 @@
 
 (defn game []
   "Starts game. It will create frame with walls, snake, apple and noisers in it."
-  (let [level (ref nil)
+  (let [level (snakejure.levels.basic/create-level)
 	frame (JFrame. "Snake")
-	panel (game-panel level)]
-    (reset level)
+	panel (create-game-panel level)]
     (doto frame
       (.add panel)
       (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
