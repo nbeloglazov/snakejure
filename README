@@ -20,6 +20,7 @@ core.clj - contains basic functions, "business" functions :).
 	   They are responsible for changing state of the game.
 ui.clj   - contains user interface functions. 
   	   They interact with user, create frame, timer, action listeners.
+level_loader.clj - contains functions for loading all levels from levels directory.
 levels directory - directory with clj files, which represents levels.
 
 Each level is a separate clj file with at least 1 public function - "level-description" with no arguments:
@@ -35,8 +36,7 @@ It must return map with following keys: :name :level-creator
 For example see basic.clj level.
 
 ## TODO
-1. Add levels: every level is map with :snake :generator :noisers keys. Apple generator is a function
-for generating apples. I want every level to be in it's own clj file, and application will dynamically load them.
+1. Add levels. Every level must be in it's own clj file, and application will dynamically load them.
 2. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
 3. Improve gui part of the game.
