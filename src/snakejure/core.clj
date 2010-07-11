@@ -26,6 +26,38 @@
 		          [key `(~(keyword key) ~mp)])))
      ~@body))
 
+(defn create-wall
+  "Creates new wall in given point."
+  [p]
+  {:location p
+   :type :wall
+   :color (Color/BLACK)})
+
+(defn create-noiser
+  "Creates new noiser in given point."
+  [p]
+  {:location p
+   :type :noiser
+   :color-noise (Color/BLUE)
+   :color-silence (Color/MAGENTA)})
+
+(defn create-snake
+  "Creates new snake with given body. And direction to right."
+  [body]
+  {:body body
+   :type :snake
+   :dir :right
+   :color (Color/CYAN)})
+
+(defn create-apple
+  "Creates new apple in given point."
+  [p]
+  {:location p
+   :type :apple
+   :color (Color/RED)})
+
+
+
 (defn overlaps-body? 
   "Check, if snake's body overlaps some given point."
   [{body :body} point]

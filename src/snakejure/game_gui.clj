@@ -1,12 +1,12 @@
 (ns snakejure.game-gui
       (:use (clojure.contrib import-static)
 	    (snakejure core))
-      (:require   (snakejure.levels basic))
+      (:require (snakejure.levels basic))
       (:import (java.awt Dimension)
-	       (java.awt.event ActionListener KeyListener)
-	       (javax.swing JPanel Timer JFrame JOptionPane)))
+	       (java.awt.event ActionListener KeyAdapter)
+	       (javax.swing JPanel Timer)))
 
-(import-static java.awt.event.KeyEvent VK_SPACE VK_LEFT VK_RIGHT VK_UP VK_DOWN)
+(import-static java.awt.event.KeyEvent VK_SPACE VK_LEFT VK_RIGHT VK_UP VK_DOWN VK_ESCAPE)
 
 (def key-to-dir {VK_RIGHT :right
                  VK_LEFT :left
@@ -15,11 +15,6 @@
 (def size 20)
 (def speed 100)
 (def dir-keys (set (keys key-to-dir)))
-
-(defn- reset
-  "Take level ref and set new level to it."
-  [level]
-  (dosync (ref-set level (add-d (snakejure.levels.basic/create-level)))))
 
 (defn- draw-point 
   "Draws point on given graphics g."
@@ -49,9 +44,10 @@
     (.setColor g color-silence))
   (draw-point g location d))
 
-(defn- switch-timer [timer]
+(defn- switch-timer
   "Stop timer, if it's running.
   Start otherwise."
+  [timer]
   (if (.isRunning timer) 
     (.stop timer)
     (.restart timer)))
@@ -72,47 +68,40 @@
 			   (Dimension. (* (inc (dec width)) size) 
 				       (* (inc (dec height)) size)))))
 
-(defn- create-action-listener [level panel]
+(defn- create-action-listener [level panel end-fn]
   (proxy [ActionListener] []
 	 (actionPerformed [e]
 			  (let-map [@level snake noisers walls] 
 			    (update-snake-position level)
 			    (when (lose? snake walls) 
-			      (JOptionPane/showMessageDialog nil "You lose...")
-			      (reset level))
+			      (end-fn :lose)
+			      (switch-timer (.getSource e)))
 			    (when (win? snake noisers)
-			      (JOptionPane/showMessageDialog nil "You win!")
-			      (reset level))
+			      (end-fn :win)
+			      (switch-timer (.getSource e)))
 			    (.repaint panel)))))
 
 
-(defn- create-key-listener [level timer]
-  (proxy [KeyListener] []
+(defn- create-key-listener [level timer end-fn]
+  (proxy [KeyAdapter] []
 	 (keyPressed [e]
-		     (if (= (.getKeyCode e) VK_SPACE)
-		       (switch-timer timer))
-		     (if (dir-keys (.getKeyCode e))
-		       (update-snake-direction level (key-to-dir (.getKeyCode e)))))
-	 (keyReleased [e])
-	 (keyTyped [e])))
+		     (let [code (.getKeyCode e)]
+		       (when (= code VK_SPACE)
+			 (switch-timer timer))
+		       (when (= code VK_ESCAPE)
+			 (end-fn :exit)
+			 (switch-timer timer))
+		       (when (dir-keys code)
+			 (update-snake-direction level (key-to-dir (.getKeyCode e))))))))
 
-(defn create-game-panel [lvl]
+(defn create-game-panel [lvl end-fn]
+  "Creates panel, which displays game level.
+  end-fn will be called when user wins or loses."
   (let [level (ref (add-d lvl))
 	panel (poor-game-panel level)
-	action-listener (create-action-listener level panel)
+	action-listener (create-action-listener level panel end-fn)
 	timer (Timer. speed action-listener)
-	key-listener (create-key-listener level timer)]
+	key-listener (create-key-listener level timer end-fn)]
     (doto panel
       (.setFocusable true)
       (.addKeyListener key-listener))))
-
-(defn game []
-  "Starts game. It will create frame with walls, snake, apple and noisers in it."
-  (let [level (snakejure.levels.basic/create-level)
-	frame (JFrame. "Snake")
-	panel (create-game-panel level)]
-    (doto frame
-      (.add panel)
-      (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
-      (.pack)
-      (.setVisible true))))

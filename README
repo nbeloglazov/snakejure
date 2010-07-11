@@ -4,9 +4,9 @@ Game snake, created for learning clojure purpose.
 
 ## Usage
 
-You can start game by executing game.sh (linux) or game.bat (windows).
-Or you can start game by invoking function "game" from ui.clj file, 
-this function in snakejure.uo namespace.
+You can start game by executing menu.sh (linux) or menu.bat (windows).
+Or you can start game by invoking function "show-menu" from menu_gui.clj file, 
+this function in snakejure.menu-gui namespace.
 To win game you must "lay" on every "noiser" (magenta rectangles) simultaneously. When you win game resets.
 
 ## Installation
@@ -18,8 +18,11 @@ I hope I'll start use it in future.
 
 core.clj - contains basic functions, "business" functions :). 
 	   They are responsible for changing state of the game.
-ui.clj   - contains user interface functions. 
-  	   They interact with user, create frame, timer, action listeners.
+	   It also contains function, which creates apple, wall, noiser from point and
+	   snake from seq of points (body).
+game_gui.clj - contains functions, which creates and runs concrete level. 
+menu_gui.clj - contains functions, which creates frame and displays menu, where user can choose some level.
+	       It also creates panel by function from game_gui.clj and displays it.
 level_loader.clj - contains functions for loading all levels from levels directory.
 levels directory - directory with clj files, which represents levels.
 
@@ -28,6 +31,7 @@ Each level is a separate clj file with at least 1 public function - "level-descr
 It must return map with following keys: :name :level-creator
 :name - String - name of the level
 :level-creator - function, which takes no arguments and returns map with following keys:
+
 :walls - sequence of walls
 :apple - map, representing apple.
 :snake - map, representing snake.
@@ -36,10 +40,12 @@ It must return map with following keys: :name :level-creator
 For example see basic.clj level.
 
 ## TODO
-1. Add levels. Every level must be in it's own clj file, and application will dynamically load them.
-2. Extract from core.clj all functions, which are responsible for modifying
+1. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
-3. Improve gui part of the game.
+2. Improve gui part of the game.
+3. Add some 
+3. Create more levels.
+
 
 
   
