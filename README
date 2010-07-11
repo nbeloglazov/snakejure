@@ -8,6 +8,9 @@ You can start game by executing menu.sh (linux) or menu.bat (windows).
 Or you can start game by invoking function "show-menu" from menu_gui.clj file, 
 this function in snakejure.menu-gui namespace.
 To win game you must "lay" on every "noiser" (magenta rectangles) simultaneously. When you win game resets.
+First you should choose level you want to play and press enter.
+To start/pause game press space. You can change direction with arrow keys. 
+To return to main menu you can press escape.
 
 ## Installation
 
