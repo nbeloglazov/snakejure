@@ -1,9 +1,12 @@
 (ns snakejure.menu-gui
     (:import (javax.swing JFrame JList JOptionPane)
-	     (java.awt.event KeyAdapter KeyEvent))
+	     (java.awt.event KeyAdapter KeyEvent)
+	     (java.awt Dimension))
     (:use [snakejure.level-loader :only (get-levels-map)]
 	  [snakejure.game-gui :only (create-game-panel)]))
 
+(def width 100)
+(def height 400)
 
 (defn- create-poor-jlist []
   "Creates Jlist without any listeners."
@@ -16,6 +19,9 @@
     (.removeAll)
     (.add panel)
     (.revalidate))
+  (doto frame
+    (.pack)
+    (.setLocationRelativeTo nil))
   (.requestFocus panel))
 
 (declare create-jlist)
@@ -42,7 +48,8 @@
   (let [jlist (create-poor-jlist)
 	key-listener (create-key-listener frame)]
     (doto jlist
-      (.addKeyListener key-listener))))
+      (.addKeyListener key-listener)
+      (.setPreferredSize (Dimension. width height)))))
 
 (defn show-menu []
   (let [frame (JFrame. "Snakejure")
@@ -51,6 +58,7 @@
       (.add list)
       (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
       (.pack)
+      (.setLocationRelativeTo nil)
       (.setVisible true))))
 	 
   
