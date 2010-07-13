@@ -133,6 +133,7 @@
   (dosync (alter level 
 		 assoc :snake (turn-snake (:snake @level) dir))))
 
+
 (defn update-snake-position
   "Takes level ref and moves snake in it,
   altering ref."
@@ -142,10 +143,9 @@
 	    (if (eats? snake apple)
 	      (let [new-snake (move-snake snake :grow)]
 		(alter level assoc :snake new-snake 
-                                   :apple (apple-generator new-snake walls)
+                                   :apple (apple-generator level)
 				   :d (normalize-level new-snake d)))
 	      (let [new-snake (move-snake snake)]
 		(alter level assoc :snake new-snake
 		                   :d (normalize-level new-snake d)))))))
-
 

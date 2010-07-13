@@ -39,7 +39,7 @@ It must return map with following keys: :name :level-creator
 :apple - map, representing apple.
 :snake - map, representing snake.
 :noisers - sequence of noisers.
-:apple-generator - function, which takes snake and walls and returns new apple.
+:apple-generator - function, which takes level and returns new apple.
 For example see basic.clj level.
 
 ## TODO

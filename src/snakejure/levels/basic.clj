@@ -27,8 +27,10 @@
 (defn create-apple-local
   "Creates new apple in random point.
   Created apple won't overlap snake's body and walls."
-  [snake walls]
-  (create-apple (find-first #(not (overlaps-body? snake %)) (repeatedly #(random-point walls)))))
+  ([{:keys [snake walls]}]
+   (create-apple-local snake walls))
+  ([snake walls]
+  (create-apple (find-first #(not (overlaps-body? snake %)) (repeatedly #(random-point walls))))))
 
 
 (defn- create-noisers
