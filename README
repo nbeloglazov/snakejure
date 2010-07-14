@@ -46,7 +46,7 @@ For example see basic.clj level.
 1. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
 2. Improve gui part of the game.
-3. Add some 
+3. Add logging.
 3. Create more levels.
 
 
