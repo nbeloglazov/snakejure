@@ -14,7 +14,7 @@
 
 (defn- random-point []
   [(inc (rand-int (dec height)))
-   (int (rand-int (dec width)))])
+   (inc (rand-int (dec width)))])
 
 (defn- cr-snake []
   (create-snake (list [ (quot height 2)
