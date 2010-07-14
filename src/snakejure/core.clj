@@ -143,7 +143,7 @@
 	    (if (eats? snake apple)
 	      (let [new-snake (move-snake snake :grow)]
 		(alter level assoc :snake new-snake 
-                                   :apple (apple-generator level)
+                                   :apple (apple-generator @level)
 				   :d (normalize-level new-snake d)))
 	      (let [new-snake (move-snake snake)]
 		(alter level assoc :snake new-snake
