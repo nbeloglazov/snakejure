@@ -26,6 +26,19 @@
 		          [key `(~(keyword key) ~mp)])))
      ~@body))
 
+(defn level-to-str 
+  "Converts level to handy string for logging purpose.
+   If you specify one or more parts of level (e.g. :walls, :snake)
+   they will be excluded from string"
+  [level & excl]
+  (str "############################\n"
+       (->> level
+	    (keys)
+	    (remove #(includes? excl %))
+	    (map #(str % " " (print-str (level %)) \newline))
+	    (apply str))
+       "############################"))
+
 (defn create-wall
   "Creates new wall in given point."
   [p]

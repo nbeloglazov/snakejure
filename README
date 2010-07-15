@@ -42,11 +42,16 @@ It must return map with following keys: :name :level-creator
 :apple-generator - function, which takes level and returns new apple.
 For example see basic.clj level.
 
+## Logging
+
+I decided to use logging in project. Now it logs all level changes to file log.txt. 
+You can change file in menu_gui.clj in *log-file* variable.
+I use clojure.contrib.logging and log4j libraries.
+
 ## TODO
 1. Extract from core.clj all functions, which are responsible for modifying
 mutable data (like update-smth). But I don't know now what name new clj file and namespace should have.
 2. Improve gui part of the game.
-3. Add logging.
 3. Create more levels.
 
 

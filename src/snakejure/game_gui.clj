@@ -1,5 +1,6 @@
 (ns snakejure.game-gui
-      (:use (clojure.contrib import-static)
+      (:use (clojure.contrib import-static
+			     logging)
 	    (snakejure core))
       (:require (snakejure.levels basic))
       (:import (java.awt Dimension)
@@ -73,6 +74,7 @@
 	 (actionPerformed [e]
 			  (let-map [@level snake noisers walls] 
 			    (update-snake-position level)
+			    (trace (level-to-str @level :walls))
 			    (when (lose? snake walls) 
 			      (end-fn :lose)
 			      (switch-timer (.getSource e)))
@@ -97,6 +99,7 @@
 (defn create-game-panel [lvl end-fn]
   "Creates panel, which displays game level.
   end-fn will be called when user wins or loses."
+  (info (level-to-str lvl))
   (let [level (ref (add-d lvl))
 	panel (poor-game-panel level)
 	action-listener (create-action-listener level panel end-fn)

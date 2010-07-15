@@ -1,12 +1,23 @@
 (ns snakejure.menu-gui
     (:import (javax.swing JFrame JList JOptionPane)
 	     (java.awt.event KeyAdapter KeyEvent)
-	     (java.awt Dimension))
+	     (java.awt Dimension)
+	     (org.apache.log4j Logger FileAppender SimpleLayout Level))
     (:use [snakejure.level-loader :only (get-levels-map)]
 	  [snakejure.game-gui :only (create-game-panel)]))
 
 (def width 100)
 (def height 400)
+(def *log-file* "log.txt")
+(def *log-level* (Level/TRACE))
+
+(defn init-logging 
+  "Inits logging to log all level changes to *log-file*"
+  []
+  (doto (Logger/getRootLogger)
+    (.addAppender (FileAppender. (SimpleLayout.) *log-file* false))
+    (.setLevel *log-level*)))
+  
 
 (defn- create-poor-jlist []
   "Creates Jlist without any listeners."
@@ -54,6 +65,7 @@
 (defn show-menu []
   (let [frame (JFrame. "Snakejure")
 	list (create-jlist frame)]
+    (init-logging)
     (doto frame
       (.add list)
       (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
