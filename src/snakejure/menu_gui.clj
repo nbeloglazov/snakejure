@@ -1,7 +1,7 @@
 (ns snakejure.menu-gui
-    (:import (javax.swing JFrame JList JLabel JOptionPane JPanel ListCellRenderer)
+    (:import (javax.swing JFrame JList JLabel JOptionPane JPanel ListCellRenderer ImageIcon)
 	     (java.awt.event KeyAdapter KeyEvent)
-	     (java.awt Dimension Color)
+	     (java.awt Dimension Color BorderLayout)
 	     (org.apache.log4j Logger FileAppender SimpleLayout Level))
     (:use [snakejure.level-loader :only (get-levels-map)]
 	  [snakejure.game-gui :only (create-game-panel)]
@@ -27,14 +27,15 @@
     (for [name level-names] [name (results name)])))
 
 (defn- create-list-renderer []
-  (proxy  [ListCellRenderer] []
-    (getListCellRendererComponent [list [name result] index is-sel has-focus]
-				  (doto (JPanel.)
-				    (.setName name)
-				    (.add (JLabel. name))
-				    (.setBackground (if is-sel
-						      (Color/LIGHT_GRAY)
-						      (Color/WHITE)))))))
+  (let [icon (ImageIcon. "resources/check.gif")]
+    (proxy  [ListCellRenderer] []
+      (getListCellRendererComponent [_ [name result] _ is-sel _]
+				    (doto (JPanel. (BorderLayout.))
+				      (.setName name)
+				      (.add (JLabel. name (when (= result :win) icon) (JLabel/LEFT)))
+				      (.setBackground (if is-sel
+							(Color/LIGHT_GRAY)
+							(Color/WHITE))))))))
 
     
 
@@ -90,7 +91,7 @@
     (init-logging)
     (doto frame
       (.add list)
-      (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
+;      (.setDefaultCloseOperation (JFrame/EXIT_ON_CLOSE))
       (.pack)
       (.setLocationRelativeTo nil)
       (.setVisible true))))
