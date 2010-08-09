@@ -103,7 +103,8 @@
   (let [level (ref (add-d lvl))
 	panel (poor-game-panel level)
 	action-listener (create-action-listener level panel end-fn)
-	timer (Timer. speed action-listener)
+	real-speed (if (:speed lvl) (:speed lvl) speed)
+	timer (Timer. real-speed action-listener)
 	key-listener (create-key-listener level timer end-fn)]
     (doto panel
       (.setFocusable true)

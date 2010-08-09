@@ -42,6 +42,7 @@ It must return map with following keys: :name :level-creator
 :snake - map, representing snake.
 :noisers - sequence of noisers.
 :apple-generator - function, which takes level and returns new apple.
+:speed - optional, if speed is not set speed will be 100ms.
 For example see basic.clj level.
 
 ## Logging
