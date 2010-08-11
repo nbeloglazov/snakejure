@@ -60,7 +60,8 @@
   {:body body
    :type :snake
    :dir :right
-   :color (Color/CYAN)})
+   :color (Color/CYAN)
+   :eyes-color (Color/BLACK)})
 
 (defn create-apple
   "Creates new apple in given point."
