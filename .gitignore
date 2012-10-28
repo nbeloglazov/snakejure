@@ -1,4 +1,5 @@
 # Ignore log file
 log.txt
 lib/*
+target
 *~
