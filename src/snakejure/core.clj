@@ -17,6 +17,4 @@
   	{:port 12345}))
 
 (defn start-client []
-  (aleph-obj/object-client
-   {:host "localhost"
-	:port 12345}))
+  (object-client {:host "localhost" :port 12345}))
