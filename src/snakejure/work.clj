@@ -1,6 +1,15 @@
-(ns snakejure.work)
+(ns snakejure.work
+  (:use [snakejure.core :only (start-server start-client)]
+        [lamina.core :only (siphon grounded-channel receive-all enqueue)]
+        [aleph.object :only (start-object-server object-client)]))
 
 #_ (
+; Вспомогательная функция для отображения новых сообщений.
+(defn show-new [messages]
+  (doseq [message @messages]
+    (println message))
+  (reset! messages []))
+
 
 ; Запустим сервер
 (def server (start-server))
@@ -22,7 +31,7 @@
 (enqueue ch1 "Hello from 1st client!")
 
 ; Посмотрим, пришло первому клиенту его же сообщение.
-(println @mes1)
+(show-new mes1)
 
 
 
@@ -39,12 +48,31 @@
 (enqueue ch2 "2st client is here!")
 
 ; Посмотрим, получил ли 2 клиент своё сообщение.
-(println @mes2)
+(show-new mes2)
 
 ; Посмотрим сообщения 1 клиента.
-(println @mes1)
+(show-new mes1)
 
 ; Остановим сервер
 (server)
 
+
+
+
+; Попробуем подключится к нелокальному серверу.
+(def ch @(object-client
+          {:host "taste-o-code.com" :port 12345}))
+
+; Создадим атом собщений.
+(def mes (atom []))
+
+(receive-all ch #(swap! mes conj %))
+
+; Пошлём сообщение!
+(enqueue ch "Is anybody here?")
+
+; Мы получили своё сообщение?
+(show-new mes)
+
 )
+
