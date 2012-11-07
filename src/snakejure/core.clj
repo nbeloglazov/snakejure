@@ -2,7 +2,8 @@
   (:use [lamina.core :only (siphon grounded-channel receive-all enqueue)]
         [aleph.object :only (start-object-server object-client)]))
 
-(defn empty-handler [message])
+(def field-width 40)
+(def field-height 30)
 
 (def broadcast (grounded-channel))
 
