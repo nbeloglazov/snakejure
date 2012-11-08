@@ -3,6 +3,8 @@
             [snakejure.core :as core]))
 
 (def cell-size 20)
+(def semaphore (java.util.concurrent.Semaphore. 0))
+(def frequency 300)
 
 (def test-world {:apples #{}
                  :snakes [{:body [[2 3] [1 3] [1 4] [1 5] [2 5] [3 5] [3 4]]
@@ -33,7 +35,7 @@
     (draw-cell quil/rect wall)))
 
 (defn draw []
-  (println "Draw" (quil/frame-count))
+  (.acquire semaphore)
   (let [{:keys [snakes apples walls]} @world]
     (quil/background 200)
     (quil/ellipse-mode :corner)
@@ -44,7 +46,7 @@
 
 (defn setup []
   (quil/smooth)
-  (quil/frame-rate 10))
+  (quil/frame-rate 60))
 
 (declare timer)
 
@@ -55,7 +57,8 @@
 (def timer (java.util.Timer.))
 
 (defn next-step []
-  (swap! world core/update-world))
+  (swap! world core/update-world)
+  (.release semaphore))
 
 (defn run []
   (let [timer-task (proxy [java.util.TimerTask] []
@@ -66,6 +69,4 @@
            :draw draw
            :size [(* core/field-width cell-size)
                   (* core/field-height cell-size)])
-    (.schedule timer timer-task 0 500)))
-
-(run)
+    (.schedule timer timer-task 0 frequency)))

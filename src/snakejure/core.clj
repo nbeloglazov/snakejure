@@ -52,7 +52,7 @@
         occupied (frequencies (concat walls
                                       (mapcat :body new-snakes)))
         dead? (fn [snake] (> (occupied (first (:body snake))) 1))
-        {dead true, alive false} (group-by dead? new-snakes)]
+        alive (remove dead? new-snakes)]
     {:walls walls
      :snakes alive
      :apples (update-apples alive walls apples)}))
