@@ -11,8 +11,6 @@
                            :dir :right}]
                  :walls #{[20 20] [30 30]}})
 
-;(update-world test-world)
-
 (def dirs {:right [1 0]
            :left [-1 0]
            :up [0 -1]
