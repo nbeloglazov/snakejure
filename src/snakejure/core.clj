@@ -45,8 +45,9 @@
          (into apples)))
       apples)))
 
-(defn update-world [{:keys [snakes apples walls]}]
-  (let [new-snakes (map #(move-snake % apples) snakes)
+(defn update-world [world]
+  (let [{:keys [snakes apples walls]} world
+        new-snakes (map #(move-snake % apples) snakes)
         occupied (frequencies (concat walls
                                       (mapcat :body new-snakes)))
         dead? (fn [snake] (> (occupied (first (:body snake))) 1))
