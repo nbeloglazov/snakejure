@@ -8,18 +8,27 @@
 (def broadcast (grounded-channel))
 (def world (atom test-world))
 (def client-to-snake-map (atom {}))
+(def max-snake-id (atom 1))
+
+(defn find-snake-idx [id]
+  (let [snake-ids (vec (keep :id (:snakes @world)))
+        idx (.indexOf snake-ids id)]
+    (if (= idx -1) nil idx)))
+
+(defn move-snake-callback [dir id]
+  (if-let [idx (find-snake-idx id)]
+    (swap! world assoc-in [:snakes (find-snake-idx id) :dir] dir)))
 
 (defn handler [channel info]
   (let [occupied (set (concat (:apples @world) (:walls @world) (mapcat :body (:snakes @world))))
-        snake-idx (count (:snakes @world))
         snake-head (first (core/rand-cells occupied))
-        snake {:body [snake-head] :dir :down}]
+        snake {:body [snake-head] :dir :down :id (swap! max-snake-id inc)}]
     (siphon broadcast channel)
-    (swap! client-to-snake-map assoc channel snake-idx)
+    (swap! client-to-snake-map assoc channel @max-snake-id)
     (swap! world assoc :snakes (conj (:snakes @world) snake))
-    (println "New snake! Number: " snake-idx " Snake: " snake)
+    (println "New snake!" snake)
     (receive-all channel
-      #(swap! world assoc-in [:snakes (@client-to-snake-map channel) :dir] %))))
+      #(move-snake-callback % (@client-to-snake-map channel)))))
 
 (def timer (java.util.Timer.))
 
