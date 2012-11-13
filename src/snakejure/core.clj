@@ -53,6 +53,6 @@
         dead? (fn [snake] (> (occupied (first (:body snake))) 1))
         alive (remove dead? new-snakes)]
     {:walls walls
-     :snakes alive
+     :snakes (vec alive)
      :apples (update-apples alive walls apples)}))
 
