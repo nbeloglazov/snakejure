@@ -1,12 +1,12 @@
 (ns snakejure.server
   (:use [lamina.core :only (siphon grounded-channel receive-all enqueue)]
-        [aleph.object :only (start-object-server object-client)]
-        [snakejure.core :as core]))
+        [aleph.object :only (start-object-server object-client)])
+  (:require [snakejure.core :as core]))
 
 (def frequency 300)
 
 (def broadcast (grounded-channel))
-(def world (atom test-world))
+(def world (atom core/test-world))
 (def client-to-snake-map (atom {}))
 (def max-snake-id (atom 1))
 
@@ -25,7 +25,7 @@
         snake {:body [snake-head] :dir :down :id (swap! max-snake-id inc)}]
     (siphon broadcast channel)
     (swap! client-to-snake-map assoc channel @max-snake-id)
-    (swap! world assoc :snakes (conj (:snakes @world) snake))
+    (swap! world update-in [:snakes] conj snake)
     (println "New snake!" snake)
     (receive-all channel
       #(move-snake-callback % (@client-to-snake-map channel)))))

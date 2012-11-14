@@ -1,8 +1,8 @@
 (ns snakejure.client
   (:require [quil.core :as quil]
-            [snakejure.core :as core]
-            [lamina.core :only (siphon grounded-channel receive-all enqueue)]
-            [aleph.object :only (start-object-server object-client)]))
+            [snakejure.core :as core])
+  (:use     [lamina.core :only (receive-all enqueue)]
+            [aleph.object :only (object-client)]))
 
 (def cell-size 20)
 (def semaphore (java.util.concurrent.Semaphore. 0))
