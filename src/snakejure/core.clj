@@ -8,7 +8,7 @@
 
 (def test-world {:apples #{[1 2] [12 42]}
                  :snakes [{:body [[2 3] [1 3] [1 4] [1 5] [2 5] [3 5] [3 4]]
-                           :dir :right}]
+                           :dir :right :id 0}]
                  :walls #{[20 20] [30 30]}})
 
 (def dirs {:right [1 0]
@@ -53,6 +53,6 @@
         dead? (fn [snake] (> (occupied (first (:body snake))) 1))
         alive (remove dead? new-snakes)]
     {:walls walls
-     :snakes alive
+     :snakes (vec alive)
      :apples (update-apples alive walls apples)}))
 

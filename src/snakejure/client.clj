@@ -1,6 +1,8 @@
 (ns snakejure.client
   (:require [quil.core :as quil]
-            [snakejure.core :as core]))
+            [snakejure.core :as core])
+  (:use     [lamina.core :only (receive-all enqueue)]
+            [aleph.object :only (object-client)]))
 
 (def cell-size 20)
 (def semaphore (java.util.concurrent.Semaphore. 0))
@@ -48,25 +50,21 @@
   (quil/smooth)
   (quil/frame-rate 60))
 
-(declare timer)
-
-(when (.isBound #'timer)
-  (println "Cancelling timer")
-  (.cancel timer))
-
-(def timer (java.util.Timer.))
-
-(defn next-step []
-  (swap! world core/update-world)
+(defn next-step [new-world]
+  (reset! world new-world)
   (.release semaphore))
 
-(defn run []
-  (let [timer-task (proxy [java.util.TimerTask] []
-                     (run [] (next-step)))]
+(defn key-handler [ch]
+  (lamina.core/enqueue ch ({\w :up \s :down \a :left \d :right}
+    (quil/raw-key))))
+
+(defn start-client [remote-addr]
+  (let [ch @(aleph.object/object-client {:host remote-addr :port 12345})]
     (quil/sketch
            :title "Multiplayer snake"
            :setup setup
            :draw draw
            :size [(* core/field-width cell-size)
-                  (* core/field-height cell-size)])
-    (.schedule timer timer-task 0 frequency)))
+                  (* core/field-height cell-size)]
+           :key-pressed #(key-handler ch))
+    (lamina.core/receive-all ch next-step)))
