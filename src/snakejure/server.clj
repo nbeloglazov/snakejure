@@ -15,32 +15,49 @@
         idx (.indexOf snake-ids id)]
     (if (= idx -1) nil idx)))
 
-(defn move-snake-callback [dir id]
+(defn move-snake [dir id]
   (if-let [idx (find-snake-idx id)]
     (swap! world assoc-in [:snakes (find-snake-idx id) :dir] dir)))
 
-(defn handler [channel info]
+(defmulti handle-message (fn [mes ch] (:type mes)))
+
+(defmethod handle-message :move-snake
+  [{:keys [dir]} channel]
+  (move-snake dir (@client-to-snake-map channel)))
+
+(defmethod handle-message :create-snake
+  [_ channel]
   (let [occupied (set (concat (:apples @world) (:walls @world) (mapcat :body (:snakes @world))))
         snake-head (first (core/rand-cells occupied))
-        snake {:body [snake-head] :dir :down :id (swap! max-snake-id inc)}]
-    (siphon broadcast channel)
-    (swap! client-to-snake-map assoc channel @max-snake-id)
+        id (swap! max-snake-id inc)
+        snake {:body [snake-head] :dir :down :id id}]
+    (swap! client-to-snake-map assoc channel id)
     (swap! world update-in [:snakes] conj snake)
-    (println "New snake!" snake)
-    (receive-all channel
-      #(move-snake-callback % (@client-to-snake-map channel)))))
+    (enqueue channel
+             {:type :snake-created
+              :id id})))
 
-(def timer (java.util.Timer.))
+(defn handler [channel info]
+  (println "New Client connected " info)
+  (siphon broadcast channel)
+  (receive-all channel #(handle-message % channel)))
 
 (defn next-step []
   (swap! world core/update-world)
-  (enqueue broadcast @world))
+  (enqueue broadcast
+           {:type :update-world
+            :world @world}))
 
 (defn start-server []
-  (let [timer-task (proxy [java.util.TimerTask] []
-                 (run [] (next-step)))]
+  (let [timer (java.util.Timer.)
+        timer-task (proxy [java.util.TimerTask] []
+                     (run [] (next-step)))
+        stop-server (start-object-server
+                     handler
+                     {:port 12345})]
     (println "Starting server at port 12345")
     (.schedule timer timer-task 0 frequency)
-    (start-object-server
-      handler
-      {:port 12345})))
+    #(do
+       (println "Stopping server")
+       (stop-server)
+       (.cancel timer))))

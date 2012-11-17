@@ -6,13 +6,10 @@
 
 (def cell-size 20)
 (def semaphore (java.util.concurrent.Semaphore. 0))
-(def frequency 300)
+(def server (atom nil))
+(def id (atom nil))
 
-(def test-world {:apples #{}
-                 :snakes [{:body [[2 3] [1 3] [1 4] [1 5] [2 5] [3 5] [3 4]]
-                           :dir :right}]
-                 :walls #{[20 20] [30 30]}})
-(def world (atom test-world))
+(def world (atom nil))
 
 (defn to-real-coords [cell]
   (map #(* cell-size %) cell))
@@ -54,17 +51,35 @@
   (reset! world new-world)
   (.release semaphore))
 
-(defn key-handler [ch]
-  (lamina.core/enqueue ch ({\w :up \s :down \a :left \d :right}
-    (quil/raw-key))))
+(defn key-handler []
+  (when (not (nil? @id))
+    (if-let [dir ({\w :up \s :down \a :left \d :right}
+                  (quil/raw-key))]
+     (enqueue @server
+              {:type :move-snake
+               :dir dir}))))
+
+(defmulti handle-message :type)
+
+(defmethod handle-message :snake-created
+  [{got-id :id}]
+  (println "Got id" got-id)
+  (reset! id got-id))
+
+(defmethod handle-message :update-world
+  [{:keys [world]}]
+  (next-step world))
 
 (defn start-client [remote-addr]
-  (let [ch @(aleph.object/object-client {:host remote-addr :port 12345})]
-    (quil/sketch
-           :title "Multiplayer snake"
-           :setup setup
-           :draw draw
-           :size [(* core/field-width cell-size)
-                  (* core/field-height cell-size)]
-           :key-pressed #(key-handler ch))
-    (lamina.core/receive-all ch next-step)))
+  (reset! server @(object-client {:host remote-addr :port 12345}))
+  (quil/sketch
+   :title "Multiplayer snake"
+   :setup setup
+   :draw draw
+   :size [(* core/field-width cell-size)
+          (* core/field-height cell-size)]
+   :key-pressed key-handler)
+  (receive-all @server handle-message)
+  (enqueue @server
+           {:type :create-snake}))
+
