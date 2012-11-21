@@ -7,8 +7,7 @@
 (def cell-size 20)
 (def semaphore (java.util.concurrent.Semaphore. 0))
 (def server (atom nil))
-(def id (atom nil))
-
+(def client-id (atom nil))
 (def world (atom nil))
 
 (defn to-real-coords [cell]
@@ -18,10 +17,15 @@
   (let [[real-x real-y] (to-real-coords cell)]
     (draw-fn real-x real-y cell-size cell-size)))
 
-(defn draw-snake [{:keys [body]}]
-  (quil/fill 0 255 0)
+(defn cross [x y w h]
+  (quil/line x y (+ x w) (+ y h))
+  (quil/line x (+ y h) (+ x w) y))
+
+(defn draw-snake [{:keys [body color id]}]
+  (apply quil/fill color)
   (doseq [cell body]
-    (draw-cell quil/rect cell)))
+    (draw-cell quil/rect cell))
+  (when (= id @current-id) (draw-cell cross (first body))))
 
 (defn draw-apples [apples]
   (quil/fill 255 0 0)
@@ -52,7 +56,7 @@
   (.release semaphore))
 
 (defn key-handler []
-  (when (not (nil? @id))
+  (when (not (nil? @current-id))
     (if-let [dir ({\w :up \s :down \a :left \d :right}
                   (quil/raw-key))]
      (enqueue @server
@@ -62,9 +66,9 @@
 (defmulti handle-message :type)
 
 (defmethod handle-message :snake-created
-  [{got-id :id}]
-  (println "Got id" got-id)
-  (reset! id got-id))
+  [{id :id}]
+  (println "Got id" id)
+  (reset! current-id id))
 
 (defmethod handle-message :update-world
   [{:keys [world]}]

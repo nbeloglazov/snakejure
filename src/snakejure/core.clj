@@ -5,16 +5,24 @@
 (def field-height 30)
 (def number-of-apples 5)
 
-
-(def test-world {:apples #{[1 2] [12 42]}
-                 :snakes [{:body [[2 3] [1 3] [1 4] [1 5] [2 5] [3 5] [3 4]]
-                           :dir :right :id 0}]
+(def test-world {:apples #{}
+                 :snakes []
                  :walls #{[20 20] [30 30]}})
 
 (def dirs {:right [1 0]
            :left [-1 0]
            :up [0 -1]
            :down [0 1]})
+
+(defn random-color
+  ([]
+     (->> #(+ 127 (rand-int 127))
+          (repeatedly 3)
+          vec))
+  ([forbidden]
+     (let [colors (repeatedly #(random-color))
+           forbidden (set forbidden)]
+       (->> colors distinct (remove forbidden) first))))
 
 (defn neib-cell [cell dir]
   (let [[new-x new-y] (map + cell (dirs dir))]
@@ -60,6 +68,10 @@
   (let [{:keys [apples walls snakes]} world
         occupied (set (concat apples walls (mapcat :body snakes)))
         snake-head (first (rand-cells occupied))
-        snake {:body [snake-head] :dir :down :id id}]
+        colors (map :color snakes)
+        snake {:body [snake-head]
+               :dir :down
+               :id id
+               :color (random-color colors)}]
     (update-in world [:snakes] conj snake)))
 

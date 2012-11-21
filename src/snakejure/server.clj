@@ -6,7 +6,11 @@
 (def frequency 300)
 
 (def broadcast (grounded-channel))
-(def world (atom core/test-world))
+
+(def world (atom (-> core/test-world
+                     (core/add-snake "bot1")
+                     (core/add-snake "bot2"))))
+
 (def client-to-snake-map (atom {}))
 (def max-snake-id (atom 1))
 
@@ -19,7 +23,6 @@
   (if-let [idx (find-snake-idx id)]
     (swap! world assoc-in [:snakes (find-snake-idx id) :dir] dir)))
 
-
 (defmulti handle-message (fn [mes ch] (:type mes)))
 
 (defmethod handle-message :move-snake
@@ -31,6 +34,7 @@
   (let [id (swap! max-snake-id inc)]
     (swap! client-to-snake-map assoc channel id)
     (swap! world core/add-snake id)
+    (println "Snake created" id)
     (enqueue channel
              {:type :snake-created
               :id id})))
@@ -38,6 +42,7 @@
 
 (defn handler [channel info]
   (println "New Client connected " info)
+  (println "Number of clients " (count @client-to-snake-map))
   (siphon broadcast channel)
   (receive-all channel #(handle-message % channel)))
 
