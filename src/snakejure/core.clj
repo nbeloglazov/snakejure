@@ -56,3 +56,10 @@
      :snakes (vec alive)
      :apples (update-apples alive walls apples)}))
 
+(defn add-snake [world id]
+  (let [{:keys [apples walls snakes]} world
+        occupied (set (concat apples walls (mapcat :body snakes)))
+        snake-head (first (rand-cells occupied))
+        snake {:body [snake-head] :dir :down :id id}]
+    (update-in world [:snakes] conj snake)))
+

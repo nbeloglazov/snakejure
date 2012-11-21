@@ -19,6 +19,7 @@
   (if-let [idx (find-snake-idx id)]
     (swap! world assoc-in [:snakes (find-snake-idx id) :dir] dir)))
 
+
 (defmulti handle-message (fn [mes ch] (:type mes)))
 
 (defmethod handle-message :move-snake
@@ -27,15 +28,13 @@
 
 (defmethod handle-message :create-snake
   [_ channel]
-  (let [occupied (set (concat (:apples @world) (:walls @world) (mapcat :body (:snakes @world))))
-        snake-head (first (core/rand-cells occupied))
-        id (swap! max-snake-id inc)
-        snake {:body [snake-head] :dir :down :id id}]
+  (let [id (swap! max-snake-id inc)]
     (swap! client-to-snake-map assoc channel id)
-    (swap! world update-in [:snakes] conj snake)
+    (swap! world core/add-snake id)
     (enqueue channel
              {:type :snake-created
               :id id})))
+
 
 (defn handler [channel info]
   (println "New Client connected " info)
