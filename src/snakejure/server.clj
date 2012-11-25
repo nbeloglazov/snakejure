@@ -1,11 +1,12 @@
 (ns snakejure.server
-  (:use [lamina.core :only (siphon grounded-channel receive-all enqueue)]
+  (:use [lamina.core :only (siphon grounded-channel receive-all enqueue on-closed channel)]
         [aleph.object :only (start-object-server object-client)])
   (:require [snakejure.core :as core]))
 
 (def frequency 300)
 
-(def broadcast (grounded-channel))
+(def ground (grounded-channel))
+(def broadcast (channel))
 
 (def world (atom (-> core/test-world
                      (core/add-snake "bot1")
@@ -39,10 +40,16 @@
              {:type :snake-created
               :id id})))
 
+(defn client-disconnected [channel]
+  (let [id (@client-to-snake-map channel)]
+    (swap! world core/remove-snake id))
+  (swap! client-to-snake-map dissoc channel)
+  (println "Client disconnected"))
 
 (defn handler [channel info]
   (println "New Client connected " info)
   (println "Number of clients " (count @client-to-snake-map))
+  (on-closed channel #(client-disconnected channel))
   (siphon broadcast channel)
   (receive-all channel #(handle-message % channel)))
 
@@ -60,6 +67,7 @@
                      handler
                      {:port 12345})]
     (println "Starting server at port 12345")
+    (siphon broadcast ground)
     (.schedule timer timer-task 0 frequency)
     #(do
        (println "Stopping server")

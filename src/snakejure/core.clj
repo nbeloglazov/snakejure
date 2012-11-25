@@ -75,3 +75,8 @@
                :color (random-color colors)}]
     (update-in world [:snakes] conj snake)))
 
+(defn remove-snake [world id]
+  (letfn [(remove-by-id [snakes]
+            (remove #(= id (:id %)) snakes))]
+   (update-in world [:snakes] remove-by-id)))
+
