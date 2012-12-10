@@ -25,7 +25,7 @@
   (apply quil/fill color)
   (doseq [cell body]
     (draw-cell quil/rect cell))
-  (when (= id @current-id) (draw-cell cross (first body))))
+  (when (= id @client-id) (draw-cell cross (first body))))
 
 (defn draw-apples [apples]
   (quil/fill 255 0 0)
@@ -56,7 +56,7 @@
   (.release semaphore))
 
 (defn key-handler []
-  (when (not (nil? @current-id))
+  (when (not (nil? @client-id))
     (if-let [dir ({\w :up \s :down \a :left \d :right}
                   (quil/raw-key))]
      (enqueue @server
@@ -68,7 +68,7 @@
 (defmethod handle-message :snake-created
   [{id :id}]
   (println "Got id" id)
-  (reset! current-id id))
+  (reset! client-id id))
 
 (defmethod handle-message :update-world
   [{:keys [world]}]
